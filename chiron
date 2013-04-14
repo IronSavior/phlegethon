@@ -1,0 +1,205 @@
+#!/bin/bash
+IF=vlan10
+
+lag_duration=600
+lag_delay_base=500ms
+lag_delay_variance=100ms
+lag_class=1:2
+lag_chain=phlegethon_lag
+
+drop_chain=phlegethon_drop
+drop_duration=15
+
+# Let him that hath understanding count the number
+# of the beast: for it is the number of a man;
+# and his number is Six hundred threescore and six.
+lag() {
+  local OIFS=$IFS; IFS=':'; local sinner=($1); IFS=$OIFS
+  shift
+  local addr=${sinner[0]}
+  local port=${sinner[1]}
+  local opts="-t mangle -A $lag_chain -j CLASSIFY --set-class $lag_class --dst $addr -o $IF"
+  if [ -z "$addr" ]; then
+    err "You must specify an address."
+  fi
+  if [ ! -z "$port" ]; then
+    opts="$opts --destination-port $port"
+  fi
+  iptables $opts $*
+  if [ $? -eq 0 ]; then
+    msg "Branded $1 with the mark of the beast.  The guilty pay the price."
+  fi
+}
+
+unlag() {
+  local OIFS=$IFS; IFS=':'; local sinner=($1); IFS=$OIFS
+  shift
+  local addr=${sinner[0]}
+  local port=${sinner[1]}
+  local opts="-t mangle -D $lag_chain -j CLASSIFY --set-class $lag_class --dst $addr -o $IF"
+  if [ -z "$addr" ]; then
+    err "You must specify an address."
+  fi
+  if [ ! -z "$port" ]; then
+    opts="$opts --destination-port $port"
+  fi
+  iptables $opts $* &>/dev/null
+  if [ $? -eq 0 ]; then
+    msg "The mark upon $1 has been purged!"
+  fi
+}
+
+cmd_lag() {
+  lag $*
+  msg "Automatic purge in $lag_duration seconds"
+  _sleep $lag_duration
+  unlag $*
+}
+
+shun() {
+  iptables -A $drop_chain -j DROP -d $1
+  iptables -A $drop_chain -j DROP -s $1
+  if [ $? -eq 0 ]; then
+    msg "$1 shunned."
+  fi
+}
+
+unshun() {
+  iptables -D $drop_chain -j DROP -d $1
+  iptables -D $drop_chain -j DROP -s $1
+  if [ $? -eq 0 ]; then
+    msg "$1 un-shunned."
+  fi
+}
+
+cmd_drop() {
+  shun $*
+  msg "Automatic purge in $drop_duration seconds"
+  _sleep $drop_duration
+  unshun $*
+}
+
+create_chain() {
+  iptables -t $2 -N $1
+  iptables -t $2 -I FORWARD -j $1
+}
+
+delete_chain() {
+  iptables -t $2 -D FORWARD -j $1
+  iptables -t $2 -F $1
+  iptables -t $2 -X $1
+}
+
+qdisc_begin() {
+  tc qdisc add dev $IF \
+    handle 1: root htb \
+    default 1
+
+  # Normal traffic
+  tc class add dev $IF \
+    parent 1: classid 1:1 htb \
+    rate 1000mbps
+
+  # Punished class
+  tc class add dev $IF \
+    parent 1: classid $lag_class htb \
+    rate 1000mbps
+
+  tc qdisc add dev $IF \
+    parent $lag_class handle 20: \
+    netem delay $lag_delay_base $lag_delay_variance
+}
+
+qdisc_end() {
+  tc qdisc del root dev $1 &>/dev/null
+}
+
+cmd_stop() {
+  qdisc_end $IF &>/dev/null
+  delete_chain $lag_chain  mangle &>/dev/null
+  delete_chain $drop_chain filter &>/dev/null
+}
+
+cmd_start() {
+  qdisc_begin $IF
+  create_chain $lag_chain  mangle
+  create_chain $drop_chain filter
+}
+
+_sleep() {
+  local duration=$1
+  shift
+  sleep $duration &
+  trap "kill $!; $*" SIGINT SIGTERM
+  wait
+}
+
+msg() {
+  if [ "$$" != "$BASHPID" ]; then echo; echo -n "[${BASHPID} `date`] "; fi
+  echo $*
+}
+
+err() {
+  echo "Error:  $*" >&2
+  exit 1
+}
+
+cmd_status() {
+  echo "qdisc on $IF:"
+  tc -s qdisc ls dev $IF
+  echo
+  echo "classes on $IF:"
+  tc -s class ls dev $IF
+  echo
+  echo "lag rules:"
+  iptables -t mangle -L $lag_chain -n -v 2>/dev/null
+  echo
+  echo "drop rules:"
+  iptables -t filter -L $drop_chain -n -v 2>/dev/null
+}
+
+resolve_cmd() {
+  local given=$1
+  shift
+  local list=($*)
+  local inv=(${list[*]##${given}*})
+  local OIFS=$IFS; IFS='|'; local pat="${inv[*]}"; IFS=$OIFS
+  shopt -s extglob
+  echo "${list[*]##+($pat)}"
+  shopt -u extglob
+}
+
+m=($(resolve_cmd $1 start stop status drop lag))
+if [ ${#m[*]} -gt 1 ]; then
+  err "$1 is ambiguous: ${m[*]}"
+  exit 1
+fi
+
+cmd=$m
+shift
+
+case $cmd in
+stop)
+  echo "Stopping..."
+  cmd_stop
+  echo "Stopped"
+  ;;
+start)
+  cmd_stop
+  echo "Starting"
+  cmd_start
+  ;;
+status)
+  cmd_status
+  ;;
+drop)
+  cmd_drop $* &
+  ;;
+lag)
+  cmd_lag $* &
+  ;;
+*)
+  echo "Usage: $0 [ start | stop | status | drop addr | lag addr[:port] ]" >&2
+  ;;  
+esac
+
