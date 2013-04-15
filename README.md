@@ -4,7 +4,7 @@ Phlegethon & Chiron
 Dynamically manage firewall rules based on peer activity.
 
 Phlegethon tracks UDP transfer rates to individual remote peers from
-a given source host.  Chiron manages firewall rules.  When a the rate
+a given source host.  Chiron manages firewall rules.  When the rate
 of data transmitted to a peer exceeds a threshold, the Chiron script
 is invoked.
 
