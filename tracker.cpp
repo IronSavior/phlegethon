@@ -2,6 +2,10 @@
 #include <sstream>
 #include <boost/thread.hpp>
 
+extern "C" {
+  #include <pcap.h>
+}
+
 #include "net.h"
 #include "stats.h"
 
