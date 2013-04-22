@@ -1,11 +1,19 @@
 #include <string>
+#include <sstream>
 #include <cstdint>
 
 #include "net.h"
 
-extern "C" {
-  #include <arpa/inet.h>
-}
+// For ntohX / htonX
+#ifdef _WIN32
+  extern "C" {
+    #include <winsock2.h>
+  }
+#else
+  extern "C" {
+    #include <arpa/inet.h>
+  }
+#endif
 
 namespace Net {
   
@@ -42,12 +50,14 @@ udp_header_t::udp_header_t( const udp_header_t& src, const bool ntoh ) {
 }
 
 std::string to_string( const addr_t& addr ) {
-  char buf[INET_ADDRSTRLEN] = "";
-  addr_t n = htonl(addr);
-  if( inet_ntop(AF_INET, &n, buf, INET_ADDRSTRLEN) != buf ) {
-    return std::string();
-  }
-  return std::string(buf);
+  auto addr_ = htonl(addr);
+  auto octet = (uint8_t*)&addr_;
+  std::ostringstream s;
+  s << (unsigned int)octet[0] << ".";
+  s << (unsigned int)octet[1] << ".";
+  s << (unsigned int)octet[2] << ".";
+  s << (unsigned int)octet[3];
+  return s.str();
 }
 
 } // namespace Net

@@ -2,11 +2,8 @@
 #include <cstdint>
 #include <boost/signals2.hpp>
 
+#include "libpcap.h"
 #include "pcap_manager.h"
-
-extern "C" {
-  #include <pcap.h>
-}
 
 namespace Pcap {
   

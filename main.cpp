@@ -1,10 +1,20 @@
 #include <iostream>
-#include <thread>
 
 #include "peer_analysis.h"
 #include "stats.h"
 #include "config.h"
 #include "pcap_manager.h"
+
+#ifdef _WIN32
+  #include <boost/thread.hpp>
+  #include "b_sleep_for.h"
+  namespace this_thread = boost::this_thread;
+  using thread = boost::thread;
+#else
+  #include <thread>
+  namespace this_thread = std::this_thread;
+  using thread = std::thread;
+#endif
 
 int main( int argc, char **argv ) {
   Config config(argc, argv);
@@ -27,7 +37,7 @@ int main( int argc, char **argv ) {
     return 1;
   }
   
-  std::thread pcap_thread(
+  thread pcap_thread(
     [&pcap]{
       pcap.capture_loop();
     }
@@ -48,7 +58,7 @@ int main( int argc, char **argv ) {
     Analysis::print_status(peer_data, config);
     Analysis::check_events(peer_data, config);
     
-    std::this_thread::sleep_for(config.ui_delay);
+    this_thread::sleep_for(config.ui_delay);
   }
   
   pcap_thread.join();

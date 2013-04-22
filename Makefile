@@ -7,24 +7,32 @@ SOURCES = main.cpp \
           config.cpp
 
 BASE_NAME := phlegethon
-OUTPUT_NAME := $(if $(COMSPEC), $(BASE_NAME).exe, $(BASE_NAME))
+
+ifdef COMSPEC
+  OUTPUT_NAME ?= $(BASE_NAME).exe
+  BOOST_LIBS ?= thread program_options system chrono exception
+  BOOST_FLAGS ?= -DBOOST_THREAD_USE_LIB
+  LDLIBS ?= $(addprefix -lboost_, $(BOOST_LIBS)) -lwpcap -lws2_32 -lstdc++
+else
+  OUTPUT_NAME ?= $(BASE_NAME)
+  BOOST_LIBS ?= program_options
+  LDLIBS ?= $(addprefix -lboost_, $(BOOST_LIBS)) -lpcap -lpthread -lstdc++
+endif
+
+DEPFLAGS ?= -MMD -MP -MF .deps/$(basename $<).dep
+CPPFLAGS ?= -Wall -O2 -std=c++11 $(BOOST_FLAGS)
 
 OBJECTS := $(addsuffix .o, $(addprefix .build/, $(basename $(SOURCES))))
 DEPFILES := $(subst .o,.dep, $(subst .build/,.deps/, $(OBJECTS)))
-
-CPPFLAGS ?= -Wall -O2 -std=c++11
-LDLIBS ?= -lstdc++ -lpthread -lpcap -lboost_program_options
-
-DEPCPPFLAGS = -MMD -MP -MF .deps/$(basename $<).dep
 
 all: $(OUTPUT_NAME)
 
 .build/%.o: %.cpp
 	@mkdir -p .deps/$(dir $<) .build/$(dir $<)
-	$(COMPILE.cpp) $(DEPCPPFLAGS) -o $@ $<
+	$(COMPILE.cpp) $(DEPFLAGS) -o $@ $<
 
 $(OUTPUT_NAME): $(OBJECTS)
-	$(CC) $^ $(LDFLAGS) $(LDLIBS) -o $@
+	$(LINK.o) $^ $(LDLIBS) -o $@
 
 clean:
 	@rm -rf .deps/ .build/ $(PHLEGETHON)

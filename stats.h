@@ -4,9 +4,9 @@
 #include <string>
 #include <map>
 #include <chrono>
+#include <boost/thread.hpp> 
 #include <cstdint>
 #include <boost/circular_buffer.hpp>
-#include <boost/thread.hpp>
 #include <boost/signals2/connection.hpp>
 
 #include "net.h"

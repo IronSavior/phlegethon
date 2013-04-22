@@ -17,11 +17,22 @@ To download this software using git:
 
 ```$ git clone https://github.com/IronSavior/phlegethon.git```
 
+## Build
+
+You will need a C++11 compiler, Boost, and libpcap.  I wrote phlegethon
+to run on Linux, but I have also successfully built it on Windows with
+MinGW/gcc (but not Cygwin).  With these requirements installed, just
+use `make` to start the build.
+
 ## Documentation
 
-You will need a C++11 compiler, Boost, and libpcap.  I use this on
-Linux, but I suppose you could use a different "chiron" script that
-works for another platform as long as libpcap is available.
+Phlegethon collects data regarding the transmission rates of discrete
+UDP streams (per remote peer) from a source address and port that are
+specified on the command line.  The number of observed peers is shown
+on the screen and any peers having data transferred to it above the
+given minimum threshold are listed.  If an event script is specified,
+then it is executed and passed the peer information when the threshold
+is exceeded.
 
 It's not that complex.  Just read the source code.
 
