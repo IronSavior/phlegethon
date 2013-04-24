@@ -6,7 +6,9 @@
 #include "net.h"
 #include "stats.h"
 
-void Stats::Tracker::on_packet( uint8_t* user, const pcap_pkthdr* header, const uint8_t* packet ) {
+namespace Stats {
+
+void Tracker::on_packet( uint8_t* user, const pcap_pkthdr* header, const uint8_t* packet ) {
   using std::chrono::seconds;
   using std::chrono::microseconds;
   using Net::ip_header_t;
@@ -36,7 +38,7 @@ void Stats::Tracker::on_packet( uint8_t* user, const pcap_pkthdr* header, const 
   dp.back().bytes   += header->len;
 }
 
-void Stats::Tracker::cleanup() {
+void Tracker::cleanup() {
   using std::chrono::seconds;
   for( auto peer = peer_data.begin(); peer != peer_data.end(); ) {
     data_point_t& dp = peer->second;
@@ -53,8 +55,20 @@ void Stats::Tracker::cleanup() {
   }
 }
 
-Stats::peer_data_t Stats::Tracker::snapshot() {
+peer_data_t Stats::Tracker::snapshot() {
   boost::mutex::scoped_lock lock(mtx);
   cleanup();
   return peer_data_t(peer_data);
 }
+
+namespace arg = std::placeholders;
+Tracker::Tracker( Pcap::PcapManager& pcap, const duration datapoint_period, const duration quantum_period )
+  : peer_data(datapoint_period, quantum_period),
+    pcap_conn(
+      pcap.packet_handler(
+        std::bind(&Tracker::on_packet, this, arg::_1, arg::_2, arg::_3)
+      )
+    )
+{}
+
+} // namespace Stats

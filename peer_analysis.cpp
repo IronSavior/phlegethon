@@ -46,7 +46,7 @@ void print_status( const Stats::peer_data_t& peer_data, const Config& config ) {
 
 peer_list_t get_busy_peers( const Stats::peer_data_t& peer_data, const size_t min_bytes ) {
   using std::chrono::seconds;
-  std::vector<Stats::peer_spec_t> result;
+  peer_list_t result;
   for( auto peer = peer_data.begin(); peer != peer_data.end(); peer++ ) {
     const Stats::data_point_t& dp = peer->second;
     unsigned long count = 0;

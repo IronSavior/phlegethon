@@ -3,8 +3,6 @@
 
 namespace Stats {
 
-namespace arg = std::placeholders;
-
 peer_spec_t::peer_spec_t()
   : addr(0), port(0) {}
 
@@ -26,15 +24,6 @@ peer_data_t::peer_data_t( const duration datapoint_period, const duration quantu
     datapoint_period(datapoint_period),
     quantum_period(quantum_period),
     samples_per_dp(datapoint_period / quantum_period)
-{}
-
-Tracker::Tracker( Pcap::PcapManager& pcap, const duration datapoint_period, const duration quantum_period )
-  : peer_data(datapoint_period, quantum_period),
-    pcap_conn(
-      pcap.packet_handler(
-        std::bind(&Tracker::on_packet, this, arg::_1, arg::_2, arg::_3)
-      )
-    )
 {}
 
 } // namespace Stats
