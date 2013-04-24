@@ -7,6 +7,24 @@
 
 namespace Pcap {
   
+interface_list_t interfaces() {
+  interface_list_t list;
+
+  char errbuf[PCAP_ERRBUF_SIZE];
+  pcap_if_t *all;
+  if( pcap_findalldevs(&all, errbuf) == -1 ) {
+    // TODO:  should throw or something
+    return list;
+  }
+
+  for( auto dev = all; dev != NULL; dev = dev->next ) {
+    list.push_back(interface_t(dev->name, dev->description? dev->description : ""));
+  }
+
+  pcap_freealldevs(all);
+  return list;
+}
+  
 void PcapManager::capture_loop( uint8_t* user ) {
   if( pcap ) {
     user_data = user;
@@ -73,6 +91,11 @@ PcapManager::~PcapManager() {
   if( pcap ) pcap_close(pcap);
   pcap = nullptr;
 }
+
+interface_t::interface_t( std::string name, std::string description )
+  : name(name),
+    description(description)
+{}
 
 void global_pcap_handler( uint8_t *user, const pcap_pkthdr* header, const uint8_t* packet ) {
   auto pcap = (PcapManager*)user;

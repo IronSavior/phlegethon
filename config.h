@@ -18,6 +18,7 @@ class Config {
 
 public:
   bool            help;
+  bool            list_interfaces;
   std::string     interface;
   std::string     host;
   std::string     event_cmd;

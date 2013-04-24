@@ -24,6 +24,17 @@ int main( int argc, char **argv ) {
     return 1;
   }
   
+  if( config.list_interfaces ) {
+    std::cout << "Interfaces:" << std::endl;
+    auto list = Pcap::interfaces();
+    for( auto iface = list.begin(); iface != list.end(); ++iface ) {
+      std::cout << "  " << iface->name;
+      if( !iface->description.empty() ) std::cout << "  [" << iface->description << "]";
+      std::cout << std::endl;
+    }
+    return 0;
+  }
+  
   if( config.host.empty() ) {
     std::cerr << "Error:  Source host is required" << std::endl;
     std::cerr << config.desc() << std::endl;
