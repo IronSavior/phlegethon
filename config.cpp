@@ -33,9 +33,9 @@ Config::Config( const int argc, const char* const argv[] ) : _desc("Options") {
       "Show a list of network interfaces")
     
     ("interface,i",
-      opt::value<std::string>(&interface)->default_value(std::string("eth0")),
+      opt::value<std::string>(&interface)->default_value(std::string()),
       "Capture interface")
-    
+
     ("cap-timeout",
       opt::value<int>(&cap_timeout)->default_value(100),
       "Capture timeout in milliseconds")

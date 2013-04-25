@@ -31,16 +31,16 @@ void print_status( const Stats::peer_data_t& peer_data, const Config& config ) {
   auto busy_peers = get_busy_peers(peer_data, config.min_rate);
   if( peer_data.size() > 0 ) {
     peer_activity = true;
-    std::cout << "Active Peers: " << busy_peers.size();
-    std::cout << " (" << peer_data.size() - busy_peers.size() << " below threshold, not shown)" << std::endl;
+    std::cout << std::endl << "Active Peers: " << busy_peers.size();
+    std::cout << " (" << peer_data.size() - busy_peers.size() << " below threshold, not shown)";
     for( auto peer = busy_peers.begin(); peer != busy_peers.end(); peer++ ) {
-      std::cout << "   " << Net::to_string(peer->addr) << ":" << peer->port << std::endl;
+      std::cout << std::endl << "   " << Net::to_string(peer->addr) << ":" << peer->port;
     }
     std::cout << std::endl;
   }
   else if( peer_activity ) {
     peer_activity = false;
-    std::cout << "No peer activity" << std::endl << std::endl;
+    std::cout << std::endl << "No peer activity" << std::endl;
   }
 }
 

@@ -16,28 +16,39 @@
   using thread = std::thread;
 #endif
 
+void print_interfaces( std::ostream& stream ) {
+  stream << "Available interfaces:" << std::endl;
+  auto list = Pcap::interfaces();
+  for( auto iface = list.begin(); iface != list.end(); ++iface ) {
+    stream << "  " << iface->name;
+    if( !iface->description.empty() ) stream << "  [" << iface->description << "]";
+    stream << std::endl;
+  }
+}
+
 int main( int argc, char **argv ) {
   Config config(argc, argv);
   
   if( config.help ) {
-    std::cerr << config.desc() << std::endl;
-    return 1;
+    std::cout << config.desc() << std::endl;
+    return 0;
   }
   
   if( config.list_interfaces ) {
-    std::cout << "Interfaces:" << std::endl;
-    auto list = Pcap::interfaces();
-    for( auto iface = list.begin(); iface != list.end(); ++iface ) {
-      std::cout << "  " << iface->name;
-      if( !iface->description.empty() ) std::cout << "  [" << iface->description << "]";
-      std::cout << std::endl;
-    }
+    print_interfaces(std::cout);
     return 0;
   }
   
   if( config.host.empty() ) {
     std::cerr << "Error:  Source host is required" << std::endl;
     std::cerr << config.desc() << std::endl;
+    return 1;
+  }
+  
+  if( config.interface.empty() ) {
+    std::cerr << "Error:  You must specify the network interface." << std::endl;
+    std::cerr << config.desc() << std::endl;
+    print_interfaces(std::cerr);
     return 1;
   }
   
@@ -65,7 +76,7 @@ int main( int argc, char **argv ) {
       dropped_count = _count;
     }
     
-    const Stats::peer_data_t peer_data(tracker.snapshot());
+    auto peer_data = tracker.snapshot();
     Analysis::print_status(peer_data, config);
     Analysis::check_events(peer_data, config);
     
