@@ -13,6 +13,7 @@ const opt::options_description Config::desc() {
 }
 
 std::string Config::pcap_filter() {
+  if( !filter.empty() ) return filter;
   std::ostringstream s;
   s << "udp and not net 65.52.0.0/14";
   s << " and src host " << host;
@@ -42,11 +43,15 @@ Config::Config( const int argc, const char* const argv[] ) : _desc("Options") {
     
     ("host,h",
       opt::value<std::string>(&host)->default_value(std::string()),
-      "Source address")
+      "Source address (ignored when used with --filter)")
     
     ("port,p",
       opt::value<int>(&port)->default_value(3074),
-      "UDP source port")
+      "UDP source port (ignored when used with --filter)")
+    
+    ("filter,f",
+      opt::value<std::string>(&filter)->default_value(std::string()),
+      "Override default pcap fitler")
     
     ("min-rate",
       opt::value<size_t>(&min_rate)->default_value(2200),

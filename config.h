@@ -21,6 +21,7 @@ public:
   bool            list_interfaces;
   std::string     interface;
   std::string     host;
+  std::string     filter;
   std::string     event_cmd;
   size_t          min_rate;
   int             port;

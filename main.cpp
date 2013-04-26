@@ -39,14 +39,14 @@ int main( int argc, char **argv ) {
     return 0;
   }
   
-  if( config.host.empty() ) {
-    std::cerr << "Error:  Source host is required" << std::endl;
+  if( config.host.empty() && config.filter.empty() ) {
+    std::cerr << "Error:  One of either --host or --filter is required." << std::endl;
     std::cerr << config.desc() << std::endl;
     return 1;
   }
   
   if( config.interface.empty() ) {
-    std::cerr << "Error:  You must specify the network interface." << std::endl;
+    std::cerr << "Error:  You must specify the network interface. (-i)" << std::endl;
     std::cerr << config.desc() << std::endl;
     print_interfaces(std::cerr);
     return 1;
