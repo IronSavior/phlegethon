@@ -12,7 +12,7 @@ ifdef COMSPEC
   OUTPUT_NAME ?= $(BASE_NAME).exe
   BOOST_LIBS ?= thread program_options system chrono exception
   BOOST_FLAGS ?= -DBOOST_THREAD_USE_LIB
-  LDLIBS ?= $(addprefix -lboost_, $(BOOST_LIBS)) -lwpcap -lws2_32 -lstdc++
+  LDLIBS ?= $(addprefix -lboost_, $(BOOST_LIBS)) -lwpcap -lws2_32 -lstdc++ -static
 else
   OUTPUT_NAME ?= $(BASE_NAME)
   BOOST_LIBS ?= program_options
