@@ -3,22 +3,22 @@
 #include "peer_analysis.h"
 #include "tracker.h"
 #include "config.h"
-#include "pcap_manager.h"
+#include "libpcap.h"
 
 #ifdef _WIN32
   #include <boost/thread.hpp>
   #include "b_sleep_for.h"
   namespace this_thread = boost::this_thread;
-  using thread = boost::thread;
+  using thread_t = boost::thread;
 #else
   #include <thread>
   namespace this_thread = std::this_thread;
-  using thread = std::thread;
+  using thread_t = std::thread;
 #endif
 
 void print_interfaces( std::ostream& stream ) {
   stream << "Available interfaces:" << std::endl;
-  auto list = Pcap::interfaces();
+  auto list = libpcap::interfaces();
   for( auto iface = list.begin(); iface != list.end(); ++iface ) {
     stream << "  " << iface->name;
     if( !iface->description.empty() ) stream << "  [" << iface->description << "]";
@@ -52,14 +52,14 @@ int main( int argc, char **argv ) {
     return 1;
   }
   
-  Pcap::PcapManager pcap(config.interface, config.pcap_filter(), config.cap_timeout);
+  libpcap::live_capture pcap(config.interface, config.pcap_filter(), config.cap_timeout);
   if( pcap.has_error() ) {
     std::cerr << "Error while setting up libpcap: ";
     std::cerr << pcap.get_error() << std::endl;
     return 1;
   }
   
-  thread pcap_thread(
+  thread_t pcap_thread(
     [&pcap]{
       pcap.capture_loop();
     }

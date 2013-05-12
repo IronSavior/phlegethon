@@ -2,10 +2,12 @@
 #include <cstdint>
 #include <boost/signals2.hpp>
 
+#include "pcap_c.h"
 #include "libpcap.h"
-#include "pcap_manager.h"
 
-namespace Pcap {
+namespace libpcap {
+
+void global_pcap_handler( uint8_t* user, const pcap_pkthdr* header, const uint8_t* packet );
   
 interface_list_t interfaces() {
   interface_list_t list;
@@ -25,32 +27,32 @@ interface_list_t interfaces() {
   return list;
 }
   
-void PcapManager::capture_loop( uint8_t* user ) {
+void live_capture::capture_loop( uint8_t* user ) {
   if( pcap ) {
     user_data = user;
     pcap_loop(pcap, -1, global_pcap_handler, (uint8_t*)this);
   }
 }
 
-boost::signals2::connection PcapManager::packet_handler( packet_event_slot_t slot ) {
+boost::signals2::connection live_capture::packet_handler( packet_event_slot_t slot ) {
   return packet_event.connect(slot);
 }
 
-bool PcapManager::has_error() {
+bool live_capture::has_error() {
   return _error;
 }
 
-std::string PcapManager::get_error() {
+std::string live_capture::get_error() {
   return err_msg;
 }
 
-unsigned long PcapManager::dropped_count() {
+unsigned long live_capture::dropped_count() {
   pcap_stat stats;
   pcap_stats(pcap, &stats);
   return stats.ps_drop;
 }
 
-PcapManager::PcapManager( std::string interface, std::string filter, int cap_timeout, bool promisc , int snaplen )
+live_capture::live_capture( std::string interface, std::string filter, int cap_timeout, bool promisc , int snaplen )
   : interface(interface),
     filter(filter),
     _error(false),
@@ -87,7 +89,7 @@ PcapManager::PcapManager( std::string interface, std::string filter, int cap_tim
   }
 }
 
-PcapManager::~PcapManager() {
+live_capture::~live_capture() {
   if( pcap ) pcap_close(pcap);
   pcap = nullptr;
 }
@@ -97,9 +99,19 @@ interface_t::interface_t( std::string name, std::string description )
     description(description)
 {}
 
+packet_header_t::packet_header_t( const clock::time_point& time, const size_t len, const size_t caplen )
+  : time(time),
+    len(len),
+    cap_len(cap_len)
+{}
+
 void global_pcap_handler( uint8_t* user, const pcap_pkthdr* header, const uint8_t* packet ) {
-  auto pcap = (PcapManager*)user;
-  pcap->packet_event(pcap->user_data, header, packet);
-};
+  using std::chrono::seconds;
+  using std::chrono::microseconds;
+  
+  auto _header = packet_header_t(clock::time_point(seconds(header->ts.tv_sec) + microseconds(header->ts.tv_usec)), header->len, header->caplen);
+  auto pcap = (live_capture*)user;
+  pcap->packet_event(pcap->user_data, _header, packet);
+}
 
 } // namespace Pcap

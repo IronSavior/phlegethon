@@ -1,13 +1,12 @@
 #ifndef _GUARD_STATS_H_
 #define _GUARD_STATS_H_
+#pragma once
 
 #include <string>
 #include <map>
 #include <chrono>
-#include <boost/thread.hpp> 
 #include <cstdint>
 #include <boost/circular_buffer.hpp>
-#include <boost/signals2/connection.hpp>
 
 #include "net.h"
 

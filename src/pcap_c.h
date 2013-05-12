@@ -1,5 +1,6 @@
-#ifndef _GUARD_LIBPCAP_H_
-#define _GUARD_LIBPCAP_H_
+#ifndef _GUARD_PCAP_C_H_
+#define _GUARD_PCAP_C_H_
+#pragma once
 
 #ifdef _WIN32
   using u_int = unsigned int;

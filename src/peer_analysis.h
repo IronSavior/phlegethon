@@ -1,5 +1,6 @@
 #ifndef _GUARD_PEER_ANALYSIS_H_
 #define _GUARD_PEER_ANALYSIS_H_
+#pragma once
 
 #include <vector>
 

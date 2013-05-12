@@ -1,5 +1,6 @@
 #ifndef _GUARD_NET_H_
 #define _GUARD_NET_H_
+#pragma once
 
 #include <cstdint>
 #include <string>

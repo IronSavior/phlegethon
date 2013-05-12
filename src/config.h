@@ -1,5 +1,6 @@
 #ifndef _GUARD_CONFIG_H_
 #define _GUARD_CONFIG_H_
+#pragma once
 
 #include <chrono>
 #include <string>

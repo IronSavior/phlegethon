@@ -1,13 +1,6 @@
-SOURCES = main.cpp \
-          tracker.cpp \
-          net.cpp \
-          peer_analysis.cpp \
-          stats.cpp \
-          pcap_manager.cpp \
-          config.cpp
+SOURCES = $(wildcard src/*.cpp)
 
 BASE_NAME := phlegethon
-
 ifdef COMSPEC
   OUTPUT_NAME ?= $(BASE_NAME).exe
   BOOST_LIBS ?= thread program_options system chrono exception
@@ -35,6 +28,6 @@ $(OUTPUT_NAME): $(OBJECTS)
 	$(LINK.o) $^ $(LDLIBS) -o $@
 
 clean:
-	@rm -rf .deps/ .build/ $(PHLEGETHON)
+	@rm -rf .deps/ .build/ $(OUTPUT_NAME)
 
 -include $(DEPFILES)

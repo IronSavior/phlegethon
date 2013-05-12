@@ -1,5 +1,6 @@
 #ifndef _GUARD_B_SLEEP_FOR_H_
 #define _GUARD_B_SLEEP_FOR_H_
+#pragma once
 
 #include <chrono>
 #include <boost/chrono.hpp>
