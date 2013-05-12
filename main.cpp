@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include "peer_analysis.h"
-#include "stats.h"
+#include "tracker.h"
 #include "config.h"
 #include "pcap_manager.h"
 

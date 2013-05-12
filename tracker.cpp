@@ -5,6 +5,7 @@
 #include "libpcap.h"
 #include "net.h"
 #include "stats.h"
+#include "tracker.h"
 
 namespace Stats {
 

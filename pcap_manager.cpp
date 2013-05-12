@@ -97,7 +97,7 @@ interface_t::interface_t( std::string name, std::string description )
     description(description)
 {}
 
-void global_pcap_handler( uint8_t *user, const pcap_pkthdr* header, const uint8_t* packet ) {
+void global_pcap_handler( uint8_t* user, const pcap_pkthdr* header, const uint8_t* packet ) {
   auto pcap = (PcapManager*)user;
   pcap->packet_event(pcap->user_data, header, packet);
 };
