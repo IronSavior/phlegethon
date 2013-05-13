@@ -28,10 +28,11 @@ interface_list_t interfaces() {
 }
   
 void live_capture::capture_loop( uint8_t* user ) {
-  if( pcap ) {
+  if( pcap && !_error ) {
     user_data = user;
     pcap_loop(pcap, -1, global_pcap_handler, (uint8_t*)this);
   }
+  // TODO:  Maybe this should throw in case of _error or !pcap
 }
 
 boost::signals2::connection live_capture::packet_handler( packet_event_slot_t slot ) {
@@ -47,6 +48,7 @@ std::string live_capture::get_error() {
 }
 
 unsigned long live_capture::dropped_count() {
+  // TODO:  Should handle _error or !pcap state
   pcap_stat stats;
   pcap_stats(pcap, &stats);
   return stats.ps_drop;
@@ -99,19 +101,25 @@ interface_t::interface_t( std::string name, std::string description )
     description(description)
 {}
 
-packet_header_t::packet_header_t( const clock::time_point& time, const size_t len, const size_t caplen )
+packet_t::packet_t( const clock::time_point& time, const size_t len, const size_t caplen, const uint8_t* raw_packet )
   : time(time),
-    len(len),
-    cap_len(cap_len)
+    size(len),
+    data(raw_packet, raw_packet + caplen)
 {}
 
 void global_pcap_handler( uint8_t* user, const pcap_pkthdr* header, const uint8_t* packet ) {
   using std::chrono::seconds;
   using std::chrono::microseconds;
   
-  auto _header = packet_header_t(clock::time_point(seconds(header->ts.tv_sec) + microseconds(header->ts.tv_usec)), header->len, header->caplen);
+  auto _packet = packet_t(
+    clock::time_point(seconds(header->ts.tv_sec) + microseconds(header->ts.tv_usec)),
+    header->len,
+    header->caplen,
+    packet
+  );
+  
   auto pcap = (live_capture*)user;
-  pcap->packet_event(pcap->user_data, _header, packet);
+  pcap->packet_event(pcap->user_data, _packet);
 }
 
 } // namespace Pcap

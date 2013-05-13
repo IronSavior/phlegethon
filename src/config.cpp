@@ -38,7 +38,7 @@ Config::Config( const int argc, const char* const argv[] ) : _desc("Options") {
       "Capture interface")
 
     ("cap-timeout",
-      opt::value<int>(&cap_timeout)->default_value(100),
+      opt::value<unsigned long>(&cap_timeout)->default_value(100),
       "Capture timeout in milliseconds")
     
     ("host,h",
@@ -46,7 +46,7 @@ Config::Config( const int argc, const char* const argv[] ) : _desc("Options") {
       "Source address (ignored when used with --filter)")
     
     ("port,p",
-      opt::value<int>(&port)->default_value(3074),
+      opt::value<unsigned long>(&port)->default_value(3074),
       "UDP source port (ignored when used with --filter)")
     
     ("filter,f",
@@ -58,7 +58,7 @@ Config::Config( const int argc, const char* const argv[] ) : _desc("Options") {
       "Minimum rate in bytes-per-second")
     
     ("ui-delay",
-      opt::value<int>(&_ui_delay)->default_value(1000),
+      opt::value<unsigned long>(&_ui_delay)->default_value(1000),
       "Milliseconds between UI updates")
     
     ("on-event,e",
@@ -66,22 +66,22 @@ Config::Config( const int argc, const char* const argv[] ) : _desc("Options") {
       "Command to execute when event is observed")
     
     ("cooldown",
-      opt::value<int>(&_cooldown)->default_value(15),
+      opt::value<unsigned long>(&_cooldown)->default_value(15),
       "Minimum time (in seconds) between command executions for the same host")
     
     ("sample-period",
-      opt::value<int>(&_sample_period)->default_value(30),
-      "Period of time to measure samples (in seconds, must be a multiple of quantum-period*1000)")
+      opt::value<unsigned long>(&_sample_period)->default_value(30000),
+      "Number of milliseconds over which to measure samples (Must be a multiple of quantum-period)")
     
-    ("quantum-period",
-      opt::value<int>(&_quantum_period)->default_value(250),
-      "Smallest time interval that can be measured (in milliseconds)")
+    ("quantum",
+      opt::value<unsigned long>(&_quantum_period)->default_value(200),
+      "Number of milliseconds representing the smallest discrete interval that can be measured")
   ;
   opt::store(opt::parse_command_line(argc, argv, _desc), _vars);
   opt::notify(_vars);
   
   ui_delay = milliseconds(_ui_delay);
   cooldown = seconds(_cooldown);
-  sample_period = seconds(_sample_period);
+  sample_period = milliseconds(_sample_period);
   quantum_period = milliseconds(_quantum_period);
 }

@@ -16,19 +16,6 @@
 #endif
 
 namespace Net {
-  
-ip_header_t::ip_header_t( const ip_header_t& src, const bool ntoh )
-  : ver_ihl(src.ver_ihl),
-    tos(src.tos),
-    ttl(src.ttl),
-    protocol(src.protocol) {
-  total_length = ntoh? ntohs(src.total_length) : src.total_length;
-  id           = ntoh? ntohs(src.id)           : src.id;
-  flags_fo     = ntoh? ntohs(src.flags_fo)     : src.flags_fo;
-  checksum     = ntoh? ntohs(src.checksum)     : src.checksum;
-  src_addr     = ntoh? ntohl(src.src_addr)     : src.src_addr;
-  dst_addr     = ntoh? ntohl(src.dst_addr)     : src.dst_addr;
-}
 
 uint8_t ip_header_t::version() {
   return (ver_ihl & 0xF0) >> 4;
@@ -42,11 +29,8 @@ size_t ip_header_t::size() {
   return ihl() * sizeof(uint32_t);
 }
 
-udp_header_t::udp_header_t( const udp_header_t& src, const bool ntoh ) {
-  src_port = ntoh? ntohs(src.src_port) : src.src_port;
-  dst_port = ntoh? ntohs(src.dst_port) : src.dst_port;
-  length   = ntoh? ntohs(src.length)   : src.length;
-  checksum = ntoh? ntohs(src.checksum) : src.checksum;
+bool ip_header_t::has_options() {
+  return ihl() > IHL_NO_OPTIONS;
 }
 
 std::string to_string( const addr_t& addr ) {
@@ -58,6 +42,58 @@ std::string to_string( const addr_t& addr ) {
   s << (unsigned int)octet[2] << ".";
   s << (unsigned int)octet[3];
   return s.str();
+}
+
+template<>
+ip_header_t load( std::istream& stream, bool ntoh ) {
+  ip_header_t header;
+  stream.read((char*)&header.ver_ihl,      sizeof(header.ver_ihl));
+  stream.read((char*)&header.tos,          sizeof(header.tos));
+  stream.read((char*)&header.total_length, sizeof(header.total_length));
+  stream.read((char*)&header.id,           sizeof(header.id));
+  stream.read((char*)&header.flags_fo,     sizeof(header.flags_fo));
+  stream.read((char*)&header.ttl,          sizeof(header.ttl));
+  stream.read((char*)&header.protocol,     sizeof(header.protocol));
+  stream.read((char*)&header.checksum,     sizeof(header.checksum));
+  stream.read((char*)&header.src_addr,     sizeof(header.src_addr));
+  stream.read((char*)&header.dst_addr,     sizeof(header.dst_addr));
+  if( ntoh ) {
+    header.total_length = ntohs(header.total_length);
+    header.id =           ntohs(header.id);
+    header.flags_fo =     ntohs(header.flags_fo);
+    header.checksum =     ntohs(header.checksum);
+    header.src_addr =     ntohl(header.src_addr);
+    header.dst_addr =     ntohl(header.dst_addr);
+  }
+  return header;
+}
+
+template<>
+udp_header_t load( std::istream& stream, bool ntoh ) {
+  udp_header_t header;
+  stream.read((char*)&header.src_port, sizeof(header.src_port));
+  stream.read((char*)&header.dst_port, sizeof(header.dst_port));
+  stream.read((char*)&header.length,   sizeof(header.length));
+  stream.read((char*)&header.checksum, sizeof(header.checksum));
+  if( ntoh ) {
+    header.src_port = ntohs(header.src_port);
+    header.dst_port = ntohs(header.dst_port);
+    header.length   = ntohs(header.length);
+    header.checksum = ntohs(header.checksum);
+  }
+  return header;
+}
+
+template<>
+ether_header_t load( std::istream& stream, bool ntoh ) {
+  ether_header_t header;
+  stream.read((char*)&header.src_addr, sizeof(header.src_addr));
+  stream.read((char*)&header.dst_addr, sizeof(header.dst_addr));
+  stream.read((char*)&header.type,     sizeof(header.type));
+  if( ntoh ) {
+    header.type = ntohs(header.type);
+  }
+  return header;
 }
 
 } // namespace Net

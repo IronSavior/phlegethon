@@ -35,7 +35,7 @@ namespace Stats {
 
   using data_point_t = boost::circular_buffer<sample_t>;
   using peer_data_map_t = std::map<peer_spec_t, data_point_t>;
-  
+    
   class peer_data_t : public peer_data_map_t {
   public:
     const duration datapoint_period;
@@ -44,5 +44,14 @@ namespace Stats {
     
     peer_data_t( const duration datapoint_period, const duration quantum_period );
   };
+
+  template< typename ContainerT, typename PredicateT >
+  void erase_if( ContainerT& items, const PredicateT& predicate ) {
+    for( auto it = items.begin(); it != items.end(); ) {
+      if( predicate(*it) ) it = items.erase(it);
+      else ++it;
+    }
+  };
+
 }
 #endif

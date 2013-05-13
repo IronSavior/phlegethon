@@ -12,10 +12,10 @@ class Config {
   using clock = std::chrono::system_clock;
   boost::program_options::options_description _desc;
   boost::program_options::variables_map       _vars;
-  int _cooldown;
-  int _ui_delay;
-  int _sample_period;
-  int _quantum_period;
+  unsigned long _cooldown;
+  unsigned long _ui_delay;
+  unsigned long _sample_period;
+  unsigned long _quantum_period;
 
 public:
   bool            help;
@@ -25,8 +25,8 @@ public:
   std::string     filter;
   std::string     event_cmd;
   size_t          min_rate;
-  int             port;
-  int             cap_timeout;
+  unsigned long   port;
+  unsigned long   cap_timeout;
   clock::duration cooldown;
   clock::duration ui_delay;
   clock::duration sample_period;
@@ -39,4 +39,5 @@ public:
   Config() = delete;
   Config( const int argc, const char* const argv[] );
 };
+
 #endif

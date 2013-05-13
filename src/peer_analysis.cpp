@@ -12,7 +12,7 @@ namespace Analysis {
 void check_events( const Stats::peer_data_t& peer_data, const Config& config ) {
   using Stats::clock;
   using Net::to_string;
-  static auto last_cmd_time = clock::now();
+  static auto last_cmd_time = clock::time_point();
   
   auto busy_peers = get_busy_peers(peer_data, config.min_rate);
   if( !config.event_cmd.empty() && busy_peers.size() > 0 && last_cmd_time < clock::now() - config.cooldown ) {
@@ -20,23 +20,28 @@ void check_events( const Stats::peer_data_t& peer_data, const Config& config ) {
     for( auto peer = busy_peers.begin(); peer != busy_peers.end(); peer++ ) {
       std::ostringstream cmd;
       cmd << config.event_cmd << " " << Net::to_string(peer->addr);
-      std::cout << "Event Script: " << cmd.str() << std::endl;
+      std::cout << std::endl << "Event Script: " << cmd.str() << std::endl;
       system(cmd.str().c_str());
     }
   }
 }
 
 void print_status( const Stats::peer_data_t& peer_data, const Config& config ) {
+  static auto print_after = Stats::clock::time_point();
+  auto now = Stats::clock::now();
+  if( now < print_after ) return;
+
   static bool peer_activity = false;
   auto busy_peers = get_busy_peers(peer_data, config.min_rate);
   if( peer_data.size() > 0 ) {
-    peer_activity = true;
     std::cout << std::endl << "Active Peers: " << busy_peers.size();
     std::cout << " (" << peer_data.size() - busy_peers.size() << " below threshold, not shown)";
     for( auto peer = busy_peers.begin(); peer != busy_peers.end(); peer++ ) {
       std::cout << std::endl << "   " << Net::to_string(peer->addr) << ":" << peer->port;
     }
     std::cout << std::endl;
+    print_after = now + config.ui_delay;
+    peer_activity = true;
   }
   else if( peer_activity ) {
     peer_activity = false;

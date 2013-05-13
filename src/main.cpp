@@ -76,11 +76,11 @@ int main( int argc, char **argv ) {
       dropped_count = _count;
     }
     
-    auto peer_data = tracker.snapshot();
+    const auto peer_data = tracker.snapshot();
     Analysis::print_status(peer_data, config);
     Analysis::check_events(peer_data, config);
     
-    this_thread::sleep_for(config.ui_delay);
+    this_thread::sleep_for(config.quantum_period);
   }
   
   pcap_thread.join();
