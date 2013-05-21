@@ -2,7 +2,9 @@
 #include <sstream>
 
 #include "libpcap.h"
-#include "net.h"
+#include "net/ether.h"
+#include "net/ip.h"
+#include "net/udp.h"
 #include "tracker.h"
 
 namespace Stats {
@@ -10,23 +12,20 @@ namespace Stats {
 namespace arg = std::placeholders;
 
 void Tracker::on_packet( uint8_t* user, const libpcap::packet_t& packet ) {
-  using Net::ip_header_t;
-  using Net::udp_header_t;
-  using Net::ether_header_t;
-  using Net::load;
+  using namespace net; // ether::, ip::, udp::
   
   std::istringstream stream(std::string(packet.data.begin(), packet.data.end()));
   
-  auto ether_header = load<ether_header_t>(stream);
-  if( ether_header.type != ether_header_t::TYPE_IP ) return;
+  auto ether_header = ether::header_t::load(stream);
+  if( ether_header.type != ether::type_ip ) return;
 
-  auto ip_header = load<ip_header_t>(stream);
-  if( ip_header.protocol != ip_header_t::PROTO_UDP ) return;
+  auto ip_header = ip::header_t::load(stream);
+  if( ip_header.protocol != ip::proto_udp ) return;
   
   if( ip_header.has_options() ) {
-    stream.seekg(sizeof(ether_header_t) + ip_header.size(), std::ios_base::beg);
+    stream.seekg(sizeof(ether::header_t) + ip_header.size(), std::ios_base::beg);
   }
-  auto udp_header = load<udp_header_t>(stream);
+  auto udp_header = udp::header_t::load(stream);
   
   update(peer_spec_t(ip_header.dst_addr, udp_header.dst_port), packet);
 }
@@ -68,7 +67,7 @@ peer_data_t Stats::Tracker::snapshot() {
   return peer_data_t(peer_data);
 }
 
-Tracker::Tracker( libpcap::live_capture& pcap, const duration datapoint_period, const duration quantum_period )
+Tracker::Tracker( libpcap::live_capture& pcap, const duration& datapoint_period, const duration& quantum_period )
   : peer_data(datapoint_period, quantum_period),
     pcap_conn(
       pcap.packet_handler(

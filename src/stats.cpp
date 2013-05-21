@@ -6,10 +6,10 @@ namespace Stats {
 peer_spec_t::peer_spec_t()
   : addr(0), port(0) {}
 
-peer_spec_t::peer_spec_t( const addr_t addr, const port_t port )
+peer_spec_t::peer_spec_t( const addr_t& addr, const port_t& port )
   : addr(addr), port(port) {}
   
-bool peer_spec_t::operator <( const peer_spec_t& rhs ) const {
+bool peer_spec_t::operator<( const peer_spec_t& rhs ) const {
   return (addr == rhs.addr)? port < rhs.port : addr < rhs.addr;
 }
 

@@ -8,8 +8,6 @@
   using u_char = unsigned char;
 #endif
 
-extern "C" {
-  #include <pcap.h>
-}
+#include <pcap.h>
 
 #endif

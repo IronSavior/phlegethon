@@ -6,8 +6,6 @@
 #include <string>
 #include <boost/program_options.hpp>
 
-#include "net.h"
-
 class Config {
   using clock = std::chrono::system_clock;
   boost::program_options::options_description _desc;

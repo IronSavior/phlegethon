@@ -8,21 +8,22 @@
 #include <cstdint>
 #include <boost/circular_buffer.hpp>
 
-#include "net.h"
+#include "net/ip.h"
+#include "net/udp.h"
 
 namespace Stats {
   using clock  = std::chrono::system_clock;
   using duration = clock::duration;
-  using addr_t = Net::addr_t;
-  using port_t = Net::port_t;
+  using addr_t = net::ip::addr_t;
+  using port_t = net::udp::port_t;
   
   struct peer_spec_t {
     addr_t addr;
     port_t port;
     
     peer_spec_t();
-    peer_spec_t( const addr_t addr, const port_t port );
-    bool operator <( const peer_spec_t& rhs ) const;
+    peer_spec_t( const addr_t& addr, const port_t& port );
+    bool operator<( const peer_spec_t& rhs ) const;
   };
   
   struct sample_t {

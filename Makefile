@@ -1,4 +1,4 @@
-SOURCES = $(wildcard src/*.cpp)
+SOURCES := $(wildcard src/*.cpp) $(wildcard src/**/*.cpp)
 
 BASE_NAME := phlegethon
 ifdef COMSPEC

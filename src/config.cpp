@@ -4,7 +4,6 @@
 #include <boost/program_options.hpp>
 
 #include "config.h"
-#include "stats.h"
 
 namespace opt = boost::program_options;
 

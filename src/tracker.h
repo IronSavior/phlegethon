@@ -32,7 +32,7 @@ namespace Stats {
     void expire_samples();
     void update( const peer_spec_t& peer_spec, const libpcap::packet_t& packet );
   public:
-    Tracker( libpcap::live_capture& pcap, const duration datapoint_period, const duration quantum_period );
+    Tracker( libpcap::live_capture& pcap, const duration& datapoint_period, const duration& quantum_period );
     void on_packet( uint8_t* user, const libpcap::packet_t& packet );
     peer_data_t snapshot();
   };
