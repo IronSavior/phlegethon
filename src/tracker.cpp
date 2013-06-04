@@ -5,6 +5,7 @@
 #include "net/ether.h"
 #include "net/ip.h"
 #include "net/udp.h"
+#include "generic_erase_if.h"
 #include "tracker.h"
 
 namespace Stats {
@@ -51,6 +52,7 @@ void Tracker::update( const peer_spec_t& peer_spec, const libpcap::packet_t& pac
 void Tracker::expire_samples() {
   using peer_type = peer_data_t::value_type;
   using sample_type = peer_type::second_type::value_type;
+  using generic::erase_if;
   
   const auto deadline = clock::now() - peer_data.datapoint_period;
   erase_if(peer_data, [&deadline]( peer_type& peer ) {

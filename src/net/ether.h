@@ -24,8 +24,6 @@ namespace ether {
     uint16_t type;
     
     static header_t load( std::istream& is, bool ntoh = true );
-  private:
-    void ntoh();
   };
 
   enum class style_t {

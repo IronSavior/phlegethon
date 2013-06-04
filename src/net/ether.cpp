@@ -1,25 +1,17 @@
+#include "generic_read.h"
+#include "byte_order.h"
 #include "ether.h"
-
-// For ntohX / htonX
-#ifdef _WIN32
-  #include <winsock2.h>
-#else
-  #include <arpa/inet.h>
-#endif
 
 namespace net {
 namespace ether {
 
-void header_t::ntoh() {
-  type = ntohs(type);
-}
-
-header_t header_t::load( std::istream& is, bool ntoh ) {
+header_t header_t::load( std::istream& is, bool _ntoh ) {
+  using generic::read;
   header_t h;
-  is.read((char*)&h.src_addr, sizeof(h.src_addr));
-  is.read((char*)&h.dst_addr, sizeof(h.dst_addr));
-  is.read((char*)&h.type,     sizeof(h.type));
-  if( ntoh ) h.ntoh();
+  read(is, h.src_addr);
+  read(is, h.dst_addr);
+  read(is, h.type);
+  if( _ntoh ) h.type = ntoh(h.type);
   return h;
 }
 

@@ -4,7 +4,6 @@
 
 #include <cstdint>
 #include <istream>
-#include <string>
 
 namespace net {
 namespace udp {
@@ -19,7 +18,7 @@ namespace udp {
     
     static header_t load( std::istream& is, bool ntoh = true );
   private:
-    void ntoh();
+    void _ntoh();
   };
   
 }} // namespace net::udp

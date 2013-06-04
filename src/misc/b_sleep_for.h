@@ -6,7 +6,9 @@
 #include <boost/chrono.hpp>
 #include <boost/thread.hpp>
 
-namespace boost { namespace this_thread {
+namespace boost {
+namespace this_thread {
+  
   // Allow boost::this_thread::sleep_for to accept std::chrono::duration
   template< class Rep, class Period >
   void sleep_for( const std::chrono::duration<Rep, Period>& d ) {
@@ -15,10 +17,12 @@ namespace boost { namespace this_thread {
     using chrono::nanoseconds;
     using chrono::ceil;
     using _Period = ratio<Period::num, Period::den>;
+    
     auto _d = duration<Rep, _Period>(d.count());
     auto wake_time = steady_clock::time_point(steady_clock::now() + ceil<nanoseconds>(_d));
     sleep_until(wake_time);
   }
-}}
+  
+}} // namespace boost::this_thread
 
 #endif

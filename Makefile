@@ -13,7 +13,7 @@ else
 endif
 
 DEPFLAGS ?= -MMD -MP -MF .deps/$(basename $<).dep
-CPPFLAGS ?= -Wall -O2 -std=c++11 $(BOOST_FLAGS)
+CPPFLAGS ?= -Wall -O2 -std=c++11 -Isrc/misc $(BOOST_FLAGS)
 
 OBJECTS := $(addsuffix .o, $(addprefix .build/, $(basename $(SOURCES))))
 DEPFILES := $(subst .o,.dep, $(subst .build/,.deps/, $(OBJECTS)))

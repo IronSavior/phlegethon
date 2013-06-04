@@ -42,7 +42,7 @@ namespace ip {
     bool has_options();
     static header_t load( std::istream& is, bool ntoh = true );
   private:
-    void ntoh();
+    void _ntoh();
   };
   
   std::string to_string( const addr_t& addr );

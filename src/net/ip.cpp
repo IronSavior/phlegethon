@@ -1,12 +1,7 @@
 #include <sstream>
+#include "generic_read.h"
+#include "byte_order.h"
 #include "ip.h"
-
-// For ntohX / htonX
-#ifdef _WIN32
-  #include <winsock2.h>
-#else
-  #include <arpa/inet.h>
-#endif
 
 namespace net {
 namespace ip {
@@ -28,28 +23,29 @@ bool header_t::has_options() {
   return ihl() > IHL_WITHOUT_OPTIONS;
 }
 
-void header_t::ntoh() {
-  total_length = ntohs(total_length);
-  id           = ntohs(id);
-  flags_fo     = ntohs(flags_fo);
-  checksum     = ntohs(checksum);
-  src_addr     = ntohl(src_addr);
-  dst_addr     = ntohl(dst_addr);
+void header_t::_ntoh() {
+  total_length = ntoh(total_length);
+  id           = ntoh(id);
+  flags_fo     = ntoh(flags_fo);
+  checksum     = ntoh(checksum);
+  src_addr     = ntoh(src_addr);
+  dst_addr     = ntoh(dst_addr);
 }
 
-header_t header_t::load( std::istream& is, bool ntoh ) {
+header_t header_t::load( std::istream& is, bool _ntoh ) {
+  using generic::read;
   header_t h;
-  is.read((char*)&h.ver_ihl,      sizeof(h.ver_ihl));
-  is.read((char*)&h.tos,          sizeof(h.tos));
-  is.read((char*)&h.total_length, sizeof(h.total_length));
-  is.read((char*)&h.id,           sizeof(h.id));
-  is.read((char*)&h.flags_fo,     sizeof(h.flags_fo));
-  is.read((char*)&h.ttl,          sizeof(h.ttl));
-  is.read((char*)&h.protocol,     sizeof(h.protocol));
-  is.read((char*)&h.checksum,     sizeof(h.checksum));
-  is.read((char*)&h.src_addr,     sizeof(h.src_addr));
-  is.read((char*)&h.dst_addr,     sizeof(h.dst_addr));
-  if( ntoh ) h.ntoh();
+  read(is, h.ver_ihl);
+  read(is, h.tos);
+  read(is, h.total_length);
+  read(is, h.id);
+  read(is, h.flags_fo);
+  read(is, h.ttl);
+  read(is, h.protocol);
+  read(is, h.checksum);
+  read(is, h.src_addr);
+  read(is, h.dst_addr);
+  if( _ntoh ) h._ntoh();
   return h;
 }
 
@@ -74,12 +70,12 @@ bool addr_t::operator==( const addr_t& rhs ) const {
 }
 
 std::string to_string( const addr_t& addr ) {
-  addr_t a = htonl(addr.addr);
+  addr_t a = hton(addr.addr);
   std::ostringstream s;
-  s << (int)a.octet[0] << ".";
-  s << (int)a.octet[1] << ".";
-  s << (int)a.octet[2] << ".";
-  s << (int)a.octet[3];
+  s << static_cast<int>(a.octet[0]) << ".";
+  s << static_cast<int>(a.octet[1]) << ".";
+  s << static_cast<int>(a.octet[2]) << ".";
+  s << static_cast<int>(a.octet[3]);
   return s.str();
 }
 
