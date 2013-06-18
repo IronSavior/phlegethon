@@ -11,7 +11,7 @@ uint8_t header_t::version() {
 }
 
 uint8_t header_t::ihl() {
-  return (ver_ihl & 0x0F);
+  return ver_ihl & 0x0F;
 }
 
 size_t header_t::size() {
@@ -23,7 +23,8 @@ bool header_t::has_options() {
   return ihl() > IHL_WITHOUT_OPTIONS;
 }
 
-void header_t::_ntoh() {
+void header_t::ntoh() {
+  using net::ntoh;
   total_length = ntoh(total_length);
   id           = ntoh(id);
   flags_fo     = ntoh(flags_fo);
@@ -32,7 +33,7 @@ void header_t::_ntoh() {
   dst_addr     = ntoh(dst_addr);
 }
 
-header_t header_t::load( std::istream& is, bool _ntoh ) {
+header_t header_t::load( std::istream& is, bool ntoh ) {
   using generic::read;
   header_t h;
   read(is, h.ver_ihl);
@@ -45,7 +46,7 @@ header_t header_t::load( std::istream& is, bool _ntoh ) {
   read(is, h.checksum);
   read(is, h.src_addr);
   read(is, h.dst_addr);
-  if( _ntoh ) h._ntoh();
+  if( ntoh ) h.ntoh();
   return h;
 }
 

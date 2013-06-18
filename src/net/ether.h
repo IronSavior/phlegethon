@@ -33,6 +33,6 @@ namespace ether {
   
   std::string to_string( const addr_t& addr, const style_t& style = style_t::bytes );
 
-}} // Namespace net::ether
+}} // namespace net::ether
 
 #endif

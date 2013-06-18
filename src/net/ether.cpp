@@ -5,13 +5,13 @@
 namespace net {
 namespace ether {
 
-header_t header_t::load( std::istream& is, bool _ntoh ) {
+header_t header_t::load( std::istream& is, bool ntoh ) {
   using generic::read;
   header_t h;
   read(is, h.src_addr);
   read(is, h.dst_addr);
   read(is, h.type);
-  if( _ntoh ) h.type = ntoh(h.type);
+  if( ntoh ) h.type = net::ntoh(h.type);
   return h;
 }
 

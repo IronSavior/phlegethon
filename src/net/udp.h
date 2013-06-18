@@ -18,7 +18,7 @@ namespace udp {
     
     static header_t load( std::istream& is, bool ntoh = true );
   private:
-    void _ntoh();
+    void ntoh();
   };
   
 }} // namespace net::udp

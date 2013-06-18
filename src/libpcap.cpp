@@ -20,7 +20,12 @@ interface_list_t interfaces() {
   }
 
   for( auto dev = all; dev != NULL; dev = dev->next ) {
-    list.push_back(interface_t(dev->name, dev->description? dev->description : ""));
+    list.push_back(
+      interface_t{
+        dev->name,
+        dev->description? dev->description : ""
+      }
+    );
   }
 
   pcap_freealldevs(all);
